@@ -1,0 +1,611 @@
+Act as a senior Machine Learning Engineer, Python Developer, and Cybersecurity Log Analysis expert.
+
+I am building a BE Computer Science major project titled:
+
+“Smart-Log: Automated Syslog Anomaly Detection for Server Security”
+
+Build the complete project from scratch as a structured, modular, executable Python machine learning project.
+
+IMPORTANT:
+Do not change the project topic, algorithms, dataset, or architecture unless there is a genuine technical issue. If a technical issue exists, explain it before making a change.
+
+==================================================
+PROJECT OBJECTIVE
+==================================================
+
+Smart-Log is a behavior-based log anomaly detection system.
+
+The system must:
+
+1. Load and preprocess the HDFS log anomaly dataset.
+2. Parse raw HDFS logs into structured log events.
+3. Clean missing, duplicate, and invalid log records.
+4. Extract behavioral features from log sequences.
+5. Use Isolation Forest as the primary anomaly detection model.
+6. Use One-Class SVM as a secondary validation/refinement model.
+7. Combine the outputs of Isolation Forest and One-Class SVM.
+8. Use SHAP to explain detected anomalies.
+9. Generate anomaly alerts containing severity and explanation.
+10. Evaluate the models using Accuracy, Precision, Recall, and F1-Score.
+11. Generate meaningful graphs and visualizations.
+
+==================================================
+DATASET
+==================================================
+
+Dataset: HDFS Log Anomaly Dataset.
+
+The dataset may contain files such as:
+
+HDFS.log
+anomaly_label.csv
+
+Do not assume the exact column structure without inspecting the dataset.
+
+First:
+
+1. Inspect all dataset files.
+2. Print filenames.
+3. Inspect dimensions.
+4. Print column names.
+5. Display sample records.
+6. Check missing values.
+7. Check duplicate records.
+8. Identify the anomaly label format.
+9. Identify Block IDs from HDFS log messages.
+
+HDFS logs must be grouped by Block ID where appropriate.
+
+Use the ground-truth anomaly labels only for evaluation.
+
+Do not train the unsupervised models directly using anomaly labels.
+
+==================================================
+PROJECT ARCHITECTURE
+==================================================
+
+Implement this pipeline:
+
+HDFS Server Logs
+        ↓
+Log Ingestion
+        ↓
+Log Preprocessing
+(Log Parsing, Cleaning, Structuring)
+        ↓
+Feature Engineering
+        ↓
+Log Behavioral Model
+        ↓
+Isolation Forest
+(Primary Anomaly Detection)
+        ↓
+One-Class SVM
+(Anomaly Validation / Refinement)
+        ↓
+SHAP Explainability
+        ↓
+Generated Alerts
+(Severity + Explanation)
+        ↓
+Evaluation Metrics
+(Accuracy, Precision, Recall, F1-Score)
+
+==================================================
+LOG PARSING
+==================================================
+
+Parse raw HDFS log records.
+
+Extract relevant information such as:
+
+- Timestamp
+- Date
+- Time
+- Process ID if available
+- Log level
+- Component
+- Log message
+- Block ID
+- Event/template information
+
+Use Regex where appropriate.
+
+If event templates are required, implement a clear and reproducible log-template extraction strategy.
+
+Do not silently fabricate event IDs.
+
+Explain how event templates or event IDs are generated.
+
+==================================================
+FEATURE ENGINEERING
+==================================================
+
+Create behavioral features suitable for HDFS logs.
+
+Possible features include:
+
+- Event frequency
+- Sequence length
+- Unique event count
+- Error event count
+- Warning event count
+- INFO event count
+- Event-template frequency
+- Repeated event count
+- Block activity count
+- Time-based event patterns
+- Sequence diversity
+- Event transition characteristics
+
+Do not use login frequency, failed login attempts, or session duration because this project uses the HDFS dataset.
+
+Create a final feature matrix where one row represents one HDFS Block ID or one clearly justified behavioral log sequence.
+
+Document every feature and explain why it may help anomaly detection.
+
+Handle NaN and infinite values.
+
+==================================================
+DATA PREPARATION
+==================================================
+
+Perform:
+
+- Missing value analysis
+- Duplicate analysis
+- Invalid record handling
+- Feature validation
+- Numerical feature selection
+
+Use StandardScaler where required.
+
+Prevent data leakage.
+
+Split data appropriately for training and evaluation.
+
+Because this is an unsupervised anomaly detection project, train the models primarily on normal behavioral data where technically justified.
+
+Explain the training strategy clearly.
+
+==================================================
+ISOLATION FOREST
+==================================================
+
+Use Isolation Forest as the primary anomaly detection model.
+
+Use:
+
+scikit-learn IsolationForest
+
+Start with a reproducible configuration using random_state=42.
+
+Tune important parameters such as:
+
+- n_estimators
+- contamination
+- max_samples
+
+Generate:
+
+- Predictions
+- Decision scores
+- Anomaly scores
+
+Convert scikit-learn prediction output correctly:
+
+1 = Normal
+-1 = Anomaly
+
+Create a clear binary representation:
+
+0 = Normal
+1 = Anomaly
+
+Evaluate Isolation Forest independently.
+
+==================================================
+ONE-CLASS SVM
+==================================================
+
+Use One-Class SVM as the secondary anomaly validation or refinement model.
+
+Use:
+
+scikit-learn OneClassSVM
+
+Scale the numerical features before training.
+
+Tune:
+
+- kernel
+- gamma
+- nu
+
+Use RBF as the initial kernel.
+
+Generate One-Class SVM predictions.
+
+Convert:
+
+1 = Normal
+-1 = Anomaly
+
+into:
+
+0 = Normal
+1 = Anomaly
+
+Evaluate One-Class SVM independently.
+
+==================================================
+HYBRID VALIDATION LOGIC
+==================================================
+
+Do not simply claim that One-Class SVM reduces false positives.
+
+Implement and experimentally evaluate hybrid logic.
+
+Compare at least these strategies:
+
+Strategy 1:
+Anomaly only when both Isolation Forest and One-Class SVM classify the record as anomalous.
+
+IF = Anomaly AND OCSVM = Anomaly
+Result = Anomaly
+
+Strategy 2:
+Anomaly when either model detects an anomaly.
+
+IF = Anomaly OR OCSVM = Anomaly
+Result = Anomaly
+
+Compare Precision, Recall, and F1-Score.
+
+Select the best hybrid strategy based on experimental results.
+
+Clearly document whether One-Class SVM actually improves reliability or reduces false positives.
+
+Do not make unsupported claims.
+
+==================================================
+SHAP EXPLAINABILITY
+==================================================
+
+Integrate SHAP for anomaly explanation.
+
+Important:
+
+Isolation Forest is the primary anomaly detector.
+
+Create an explainable anomaly-scoring function or technically valid SHAP explanation approach.
+
+Do not incorrectly use SHAP without verifying model compatibility.
+
+Use an appropriate SHAP explainer.
+
+Explain:
+
+- Which model output is being explained
+- What the SHAP values represent
+- How feature contributions relate to anomaly scores
+
+For each detected anomaly, identify the top contributing features.
+
+Example:
+
+Anomaly detected.
+
+Top contributing factors:
+
+1. High event frequency
+2. Abnormal sequence length
+3. High error event count
+
+Generate human-readable explanations.
+
+Example:
+
+“This log sequence was classified as anomalous primarily because of unusually high event frequency and abnormal sequence length compared with normal HDFS behavior.”
+
+Generate SHAP summary plots where technically appropriate.
+
+==================================================
+ALERT GENERATION
+==================================================
+
+Create an alert-generation module.
+
+Each alert should contain:
+
+- Alert ID
+- Block ID
+- Anomaly prediction
+- Anomaly score
+- Severity
+- Top contributing features
+- Human-readable explanation
+
+Create project-defined severity levels.
+
+Example:
+
+LOW
+MEDIUM
+HIGH
+CRITICAL
+
+Do not claim that severity thresholds are cybersecurity industry standards.
+
+Derive severity using normalized anomaly scores or another clearly documented method.
+
+Explain the severity calculation.
+
+Example output:
+
+{
+    "alert_id": "ALT-0001",
+    "block_id": "blk_123456",
+    "anomaly": true,
+    "anomaly_score": 0.91,
+    "severity": "CRITICAL",
+    "top_features": [
+        "event_frequency",
+        "sequence_length",
+        "error_count"
+    ],
+    "explanation": "Abnormally high event frequency and sequence length were observed."
+}
+
+Save generated alerts to CSV and JSON.
+
+==================================================
+EVALUATION
+==================================================
+
+Use the HDFS ground-truth anomaly labels only for evaluation.
+
+Calculate:
+
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Confusion Matrix
+
+Evaluate separately:
+
+1. Isolation Forest
+2. One-Class SVM
+3. Hybrid AND strategy
+4. Hybrid OR strategy
+
+Create a comparison table.
+
+Example:
+
+Model                  Accuracy Precision Recall F1
+Isolation Forest
+One-Class SVM
+Hybrid AND
+Hybrid OR
+
+Use zero_division=0 where appropriate.
+
+Clearly identify the best-performing model or strategy based on the experimental results.
+
+Do not fabricate metric values.
+
+==================================================
+VISUALIZATIONS
+==================================================
+
+Use Matplotlib and Seaborn.
+
+Generate:
+
+1. Normal vs anomaly distribution
+2. Event frequency distribution
+3. Sequence length distribution
+4. Isolation Forest anomaly-score distribution
+5. Confusion matrix
+6. Model comparison chart
+7. SHAP summary plot
+8. Severity distribution
+9. Top anomaly-contributing features
+
+Save visualizations inside:
+
+outputs/plots/
+
+==================================================
+PROJECT STRUCTURE
+==================================================
+
+Create this structure:
+
+smart-log/
+│
+├── data/
+│   ├── raw/
+│   └── processed/
+│
+├── models/
+│
+├── outputs/
+│   ├── alerts/
+│   ├── plots/
+│   └── metrics/
+│
+├── src/
+│   ├── __init__.py
+│   ├── data_loader.py
+│   ├── log_parser.py
+│   ├── preprocessing.py
+│   ├── feature_engineering.py
+│   ├── isolation_forest_model.py
+│   ├── one_class_svm_model.py
+│   ├── hybrid_detector.py
+│   ├── shap_explainer.py
+│   ├── alert_generator.py
+│   ├── evaluator.py
+│   └── visualization.py
+│
+├── main.py
+├── requirements.txt
+├── README.md
+└── .gitignore
+
+Keep the code modular.
+
+Do not place the entire project in one Python file.
+
+==================================================
+MODEL PERSISTENCE
+==================================================
+
+Save trained models using joblib.
+
+Save:
+
+- Isolation Forest model
+- One-Class SVM model
+- StandardScaler
+- Required preprocessing objects
+
+Store them in:
+
+models/
+
+==================================================
+MAIN PROGRAM
+==================================================
+
+main.py must execute the complete pipeline.
+
+The execution flow should be clearly printed.
+
+Example:
+
+[1/10] Loading HDFS dataset...
+[2/10] Parsing logs...
+[3/10] Preprocessing records...
+[4/10] Extracting behavioral features...
+[5/10] Training Isolation Forest...
+[6/10] Training One-Class SVM...
+[7/10] Evaluating hybrid strategies...
+[8/10] Generating SHAP explanations...
+[9/10] Generating security alerts...
+[10/10] Saving evaluation results...
+
+At the end print:
+
+SMART-LOG EXECUTION COMPLETED
+
+Also print:
+
+- Total log sequences
+- Normal sequences
+- Actual anomalies
+- Predicted anomalies
+- Best model/strategy
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Number of generated alerts
+
+==================================================
+README
+==================================================
+
+Create a professional README.md containing:
+
+- Project title
+- Project overview
+- Problem statement
+- Objectives
+- Proposed architecture
+- Dataset
+- Technologies used
+- Project structure
+- Installation steps
+- Dataset placement instructions
+- How to run
+- ML models
+- Feature engineering
+- SHAP explainability
+- Alert generation
+- Evaluation metrics
+- Output files
+
+Do not add future enhancements.
+
+Do not add author information.
+
+Do not add fake results.
+
+==================================================
+CODING REQUIREMENTS
+==================================================
+
+Use:
+
+Python 3.8+
+Pandas
+NumPy
+Scikit-learn
+Regex
+Matplotlib
+Seaborn
+SHAP
+Joblib
+
+Write readable and modular Python code.
+
+Use functions and classes where appropriate.
+
+Add docstrings.
+
+Add meaningful comments only where required.
+
+Use pathlib for file paths where practical.
+
+Use random_state=42 for reproducibility where supported.
+
+Add proper exception handling.
+
+Do not hardcode Windows-specific absolute paths.
+
+Do not fabricate dataset columns.
+
+Inspect the actual dataset before implementing dataset-specific parsing.
+
+==================================================
+IMPORTANT DEVELOPMENT INSTRUCTION
+==================================================
+
+Build this project phase by phase.
+
+Do not generate placeholder implementations.
+
+Do not leave TODO methods.
+
+Do not create fake anomaly scores or fake evaluation results.
+
+Before implementing dataset-specific code, inspect the actual HDFS dataset files.
+
+After completing each phase:
+
+1. Explain what files were created.
+2. Explain the implementation.
+3. Run the code.
+4. Fix errors.
+5. Verify the output.
+6. Continue to the next phase.
+
+Start by creating the project structure and inspecting the HDFS dataset.
+
+If the HDFS dataset is not present in the project, create the folder structure and clearly tell me exactly which dataset files I must place in data/raw/.
+
+Do not proceed by inventing the dataset structure.
