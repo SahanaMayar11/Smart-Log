@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pythonlibs/
+.pip_cache/
+.uv_cache/
+uv.lock
+
+# Data & generated artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+outputs/alerts/*
+!outputs/alerts/.gitkeep
+outputs/plots/*
+!outputs/plots/.gitkeep
+outputs/metrics/*
+!outputs/metrics/.gitkeep
+
+.DS_Store
