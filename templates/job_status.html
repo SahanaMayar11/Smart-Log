@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Smart-Log &middot; Scanning...{% endblock %}
+{% block content %}
+<section class="panel panel-status">
+  {% if job.status == "error" %}
+    <h1 class="status-title status-error">Scan failed</h1>
+    <div class="alert-box alert-error">{{ job.error }}</div>
+    <a class="btn btn-secondary" href="{{ url_for('index') }}">Try another file</a>
+  {% else %}
+    <h1 class="status-title">Scanning log file&hellip;</h1>
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="status-message" id="status-message">{{ job.message }}</p>
+    <p class="hint">This can take a while for large logs &mdash; the page updates automatically.</p>
+  {% endif %}
+</section>
+<script>
+  const jobId = {{ job_id | tojson }};
+  const status = {{ job.status | tojson }};
+  if (status !== "error") {
+    const poll = async () => {
+      const res = await fetch(`/api/jobs/${jobId}`);
+      const data = await res.json();
+      if (data.status === "done") {
+        window.location.href = `/jobs/${jobId}/results`;
+        return;
+      }
+      if (data.status === "error") {
+        window.location.reload();
+        return;
+      }
+      document.getElementById("status-message").textContent = data.message || "Working...";
+      setTimeout(poll, 1500);
+    };
+    setTimeout(poll, 1200);
+  }
+</script>
+{% endblock %}

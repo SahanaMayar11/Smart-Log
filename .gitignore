@@ -21,3 +21,9 @@ outputs/metrics/*
 !outputs/metrics/.gitkeep
 
 .DS_Store
+data/uploads/*
+outputs/uploads/*
+!data/uploads/.gitkeep
+!outputs/uploads/.gitkeep
+__pycache__/
+*.pyc

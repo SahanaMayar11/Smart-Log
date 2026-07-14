@@ -19,6 +19,15 @@ first run, so subsequent runs skip the ~2.5-minute raw log re-parse). See
 `README.md` for full architecture, feature documentation, and the latest
 run's results table.
 
+A Flask web app (`app.py`, workflow "Start application", port 5000) lets a
+user upload a new HDFS log (plus an optional ground-truth labels CSV) and
+run live inference against the already-trained models from `models/`
+(`src/inference.py`) — no retraining. Each upload gets an isolated job id;
+results (summary stats, model comparison if labels were provided, charts,
+severity-filterable alerts table, CSV/JSON download) render on
+`/jobs/<id>/results`. Uploaded raw files are deleted after scoring; job
+results live in memory only (not persisted across app restarts).
+
 ## User preferences
 
 - Follow the detailed project brief in

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Smart-Log &middot; New Scan{% endblock %}
+{% block content %}
+<section class="panel panel-upload">
+  <h1>Run a live anomaly scan</h1>
+  <p class="lede">
+    Upload an HDFS server log and Smart-Log will parse it, extract the same
+    behavioral features used in training, and score every block with the
+    trained Isolation Forest and One-Class SVM models &mdash; producing
+    severity-ranked alerts with SHAP-derived explanations.
+  </p>
+
+  {% if error %}
+    <div class="alert-box alert-error">{{ error }}</div>
+  {% endif %}
+
+  <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="upload-form">
+    <div class="field">
+      <label for="log_file">HDFS log file <span class="required">*</span></label>
+      <input type="file" id="log_file" name="log_file" accept=".log,.txt" required>
+      <p class="hint">Format: <code>&lt;date&gt; &lt;time&gt; &lt;pid&gt; &lt;level&gt; &lt;component&gt;: &lt;message&gt;</code>, one blk_* id per line.</p>
+    </div>
+    <div class="field">
+      <label for="labels_file">Ground-truth labels CSV <span class="optional">(optional)</span></label>
+      <input type="file" id="labels_file" name="labels_file" accept=".csv">
+      <p class="hint">Two columns: <code>BlockId,Label</code> (Label = Normal/Anomaly). Enables accuracy/precision/recall/F1 and confusion matrices for this run.</p>
+    </div>
+    <button type="submit" class="btn btn-primary">Run scan</button>
+  </form>
+</section>
+
+<section class="panel panel-info">
+  <h2>What happens on upload</h2>
+  <ol class="steps">
+    <li>Stream-parse the log into per-block behavioral feature vectors (event mix, error/warning rate, timing, sequence shape).</li>
+    <li>Scale features with the training-time <code>StandardScaler</code> and score with the saved Isolation Forest (primary) and One-Class SVM (secondary) models.</li>
+    <li>Compare Isolation Forest, One-Class SVM, and Hybrid AND/OR outcomes.</li>
+    <li>Explain every flagged block with SHAP, generate severity-ranked alerts, and render charts.</li>
+  </ol>
+</section>
+{% endblock %}

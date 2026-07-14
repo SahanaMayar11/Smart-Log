@@ -7,3 +7,5 @@ shap==0.51.0
 joblib==1.5.3
 pyarrow==25.0.0
 pyarrow
+flask
+gunicorn

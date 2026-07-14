@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Smart-Log &middot; Scan Results{% endblock %}
+{% block content %}
+<section class="panel panel-summary">
+  <div class="summary-head">
+    <h1>Scan results</h1>
+    <div class="summary-actions">
+      <a class="btn btn-secondary" href="{{ url_for('index') }}">New scan</a>
+      <a class="btn btn-secondary" href="{{ url_for('job_download', job_id=job_id, kind='csv') }}">Download alerts.csv</a>
+      <a class="btn btn-secondary" href="{{ url_for('job_download', job_id=job_id, kind='json') }}">Download alerts.json</a>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat">
+      <span class="stat-value">{{ "{:,}".format(result.n_blocks) }}</span>
+      <span class="stat-label">Blocks analyzed</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ "{:,}".format(result.n_lines_parsed) }}</span>
+      <span class="stat-label">Log lines parsed</span>
+    </div>
+    <div class="stat stat-critical">
+      <span class="stat-value">{{ "{:,}".format(result.alerts | length) }}</span>
+      <span class="stat-label">Alerts generated (Isolation Forest)</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ result.severities_count.get("CRITICAL", 0) }}</span>
+      <span class="stat-label">Critical severity</span>
+    </div>
+  </div>
+
+  {% if not result.has_labels %}
+    <p class="note">No ground-truth labels were provided for this run, so this shows raw detections only (no accuracy/precision/recall &mdash; those require known labels).</p>
+  {% endif %}
+</section>
+
+{% if comparison_records %}
+<section class="panel">
+  <h2>Model / strategy comparison</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+    </thead>
+    <tbody>
+      {% for row in comparison_records %}
+      <tr class="{{ 'best-row' if row['Model'] == result.best_strategy_name else '' }}">
+        <td>{{ row["Model"] }}</td>
+        <td>{{ row["Accuracy"] }}</td>
+        <td>{{ row["Precision"] }}</td>
+        <td>{{ row["Recall"] }}</td>
+        <td>{{ row["F1"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if result.plot_files %}
+<section class="panel">
+  <h2>Charts</h2>
+  <div class="plot-grid">
+    {% for filename in result.plot_files %}
+    <figure class="plot-card">
+      <img src="{{ url_for('job_plot', job_id=job_id, filename=filename) }}" alt="{{ filename }}" loading="lazy">
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel">
+  <div class="alerts-head">
+    <h2>Alerts <span class="muted">({{ "{:,}".format(total_alerts) }} total{% if total_alerts > page_size %}, showing top {{ page_size }} by severity{% endif %})</span></h2>
+    <div class="severity-filters" id="severity-filters">
+      <button type="button" class="chip chip-all active" data-severity="ALL">All</button>
+      <button type="button" class="chip chip-critical" data-severity="CRITICAL">Critical</button>
+      <button type="button" class="chip chip-high" data-severity="HIGH">High</button>
+      <button type="button" class="chip chip-medium" data-severity="MEDIUM">Medium</button>
+      <button type="button" class="chip chip-low" data-severity="LOW">Low</button>
+    </div>
+  </div>
+
+  {% if shown_alerts %}
+  <div class="table-scroll">
+    <table class="data-table alerts-table" id="alerts-table">
+      <thead>
+        <tr><th>Alert</th><th>Block ID</th><th>Severity</th><th>Score</th><th>Top contributing features</th><th>Explanation</th></tr>
+      </thead>
+      <tbody>
+        {% for a in shown_alerts %}
+        <tr data-severity="{{ a.severity }}">
+          <td>{{ a.alert_id }}</td>
+          <td class="mono">{{ a.block_id }}</td>
+          <td><span class="badge badge-{{ a.severity | lower }}">{{ a.severity }}</span></td>
+          <td class="mono">{{ "%.4f"|format(a.anomaly_score) }}</td>
+          <td class="mono">{{ a.top_features | join(", ") }}</td>
+          <td>{{ a.explanation }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="note">No blocks were flagged as anomalous in this log.</p>
+  {% endif %}
+</section>
+<script src="{{ url_for('static', filename='js/results.js') }}"></script>
+{% endblock %}
