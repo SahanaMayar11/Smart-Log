@@ -9,14 +9,15 @@ dataset requirements, and how to run it.
 
 ## Current state
 
-Environment is set up: Python 3.11 with pandas, numpy, scikit-learn,
-matplotlib, seaborn, shap, and joblib installed (see `requirements.txt`), and
-the project directory structure (`data/`, `models/`, `outputs/`, `src/`) is
-scaffolded. The dataset (`HDFS.log`, `anomaly_label.csv`) is not yet present
-in `data/raw/` — the actual pipeline (parsing, feature engineering, model
-training, SHAP, alerting, evaluation) must be implemented against the real
-file structure, so it has not been written yet. Run `python main.py` to check
-dataset presence.
+The full pipeline is implemented and runs end-to-end against the real
+dataset (`data/raw/HDFS.log`, `anomaly_label.csv`, `HDFS.log_templates.csv`):
+log parsing, feature engineering, Isolation Forest + One-Class SVM training,
+hybrid AND/OR strategy comparison, SHAP explainability, alert generation,
+evaluation metrics, and visualizations. Run `python main.py` (parsed
+features are cached to `data/processed/block_features_raw.parquet` after the
+first run, so subsequent runs skip the ~2.5-minute raw log re-parse). See
+`README.md` for full architecture, feature documentation, and the latest
+run's results table.
 
 ## User preferences
 

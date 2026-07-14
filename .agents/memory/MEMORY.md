@@ -1,0 +1,2 @@
+- [uv/shap install quirk](uv-shap-pyproject-quirk.md) — Replit's auto pyproject.toml can misroute a package via `[tool.uv.sources]`; `uv add` fails even when pip install works fine.
+- [HDFS log anomaly pipeline design](hdfs-log-anomaly-pipeline.md) — event-template matching via substring rules, semi-supervised train/test split strategy, OCSVM subsampling for scalability.
